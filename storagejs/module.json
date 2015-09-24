@@ -1,0 +1,43 @@
+{
+  "context": {
+    "dependencies": {
+      "default": {
+        "async": [
+          {
+            "url": "build/storagejs.min.js",
+            "instances": {
+              "storagejs": "storage"
+            }
+          }
+        ]
+      },
+      "dev": {
+        "sync": [
+          {
+            "url": "lib/storagejs-1.1.0.js",
+            "instances": {
+              "storagejs": "storage"
+            }
+          }
+        ],
+        "async": [
+          "js/storage.js"
+        ]
+      }
+    },
+    "instances": {
+      "storage": {
+        "namespace": "Arenite.Storage",
+        "args": [
+          {
+            "ref": "arenite"
+          },
+          {
+            "ref": "storagejs"
+          }
+        ],
+        "init": "init"
+      }
+    }
+  }
+}

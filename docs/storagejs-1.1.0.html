@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>storagejs-1.1.0.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page_wrapper">
+            <div id="jump_page">
+              
+                
+                <a class="source" href="storagejs.min.html">
+                  storagejs.min.js
+                </a>
+              
+                
+                <a class="source" href="storage.html">
+                  storage.js
+                </a>
+              
+                
+                <a class="source" href="storagejs-1.1.0.html">
+                  storagejs-1.1.0.js
+                </a>
+              
+            </div>
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>storagejs-1.1.0.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-comment">/*!
+ * Storage.js JavaScript Library v0.1.0
+ * https://github.com/lcavadas/Storage.js
+ *
+ * Copyright 2012, Luís Serralheiro
+ */</span>
+
+<span class="hljs-keyword">var</span> storage = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">readyCallback, type</span>) </span>{
+
+  <span class="hljs-keyword">var</span> commons = {
+    sequencialActionCallbackWrapper: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">values, callback, finalCallback</span>) </span>{
+      <span class="hljs-keyword">var</span> index = <span class="hljs-number">0</span>;
+      <span class="hljs-keyword">var</span> length = values.length;
+
+      <span class="hljs-keyword">var</span> _next = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        <span class="hljs-keyword">if</span> (index &lt; length) {
+          callback(values[index++]);
+        } <span class="hljs-keyword">else</span> {
+          finalCallback();
+        }
+      };
+
+      <span class="hljs-keyword">return</span> {
+        next: _next
+      };
+    },
+    multipleActionCallbackWrapper: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">times, callback</span>) </span>{
+      <span class="hljs-keyword">var</span> values = [];
+
+      <span class="hljs-keyword">return</span> {
+        countDown: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value</span>) </span>{
+          values.push(value);
+          <span class="hljs-keyword">if</span> (values.length === (times)) {
+            callback(values);
+          }
+        }
+      };
+    }
+  };
+
+  <span class="hljs-keyword">var</span> invokeReadyCallBack = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">database</span>) </span>{
+    <span class="hljs-keyword">if</span> (!database) {
+      readyCallback();
+    } <span class="hljs-keyword">else</span> {
+      readyCallback({
+        set: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, value, callback</span>) </span>{
+          database.set(entity, value, callback);
+        },
+        setAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, values, callback</span>) </span>{
+          database.setAll(entity, values, callback);
+        },
+        get: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+          database.get(entity, id, callback);
+        },
+        getAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+          database.getAll(entity, callback);
+        },
+        remove: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+          database.remove(entity, id, callback);
+        },
+        removeAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+          database.removeAll(entity, callback);
+        },
+        ready: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">callback</span>) </span>{
+          database.ready(callback);
+        },
+        close: database.close
+      });
+    }
+  };
+
+  <span class="hljs-keyword">switch</span> (type) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'LocalStorage'</span>:
+      storage.KeyValue(invokeReadyCallBack, commons);
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'SessionStorage'</span>:
+      storage.KeyValue(invokeReadyCallBack, commons, <span class="hljs-literal">true</span>);
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'WebSQL'</span>:
+      storage.WebSQL(invokeReadyCallBack, commons);
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'IndexedDB'</span>:
+      storage.IndexedDB(invokeReadyCallBack, commons);
+      <span class="hljs-keyword">break</span>;
+    <span class="hljs-keyword">default</span> :</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>WebSQL</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (<span class="hljs-built_in">window</span>.openDatabase) {
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"Using WebSQL"</span>);
+        storage.WebSQL(invokeReadyCallBack, commons);
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-built_in">window</span>.indexedDB || <span class="hljs-built_in">window</span>.webkitIndexedDB || <span class="hljs-built_in">window</span>.mozIndexedDB || <span class="hljs-built_in">window</span>.msIndexedDB) {
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"Using IndexedDB"</span>);
+        storage.IndexedDB(invokeReadyCallBack, commons);
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"Using LocalStorage"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Fallback to localStorage</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        storage.KeyValue(invokeReadyCallBack, commons);
+      }
+      <span class="hljs-keyword">break</span>;
+  }
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>localStorage and sessionStorage wrapper
+     useSession: Indicates if sessionStorage is to be used (default is localStorage)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>storage.KeyValue = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">ready, commons, useSession</span>) </span>{
+
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">var</span> kv = useSession ? sessionStorage : localStorage;
+  } <span class="hljs-keyword">catch</span> (e) {
+    ready();
+    <span class="hljs-keyword">return</span>;
+  }
+
+  <span class="hljs-keyword">var</span> _get = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+    <span class="hljs-keyword">var</span> stored = <span class="hljs-built_in">JSON</span>.parse(kv.getItem(entity));
+    <span class="hljs-keyword">var</span> length = stored.length;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+      <span class="hljs-keyword">if</span> (stored[i].id === id) {
+        callback(stored[i]);
+        <span class="hljs-keyword">return</span>;
+      }
+    }
+    callback();
+  };
+
+  <span class="hljs-keyword">var</span> _set = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, value, callback</span>) </span>{
+    <span class="hljs-keyword">var</span> stored = <span class="hljs-built_in">JSON</span>.parse(kv.getItem(entity)) || [];
+    <span class="hljs-keyword">var</span> updated = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">var</span> length = stored.length;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+      <span class="hljs-keyword">if</span> (stored[i].id === value.id) {
+        updated = <span class="hljs-literal">true</span>;
+        stored[i] = value;
+      }
+    }
+    <span class="hljs-keyword">if</span> (!updated) {
+      stored.push(value);
+    }
+
+    kv.setItem(entity, <span class="hljs-built_in">JSON</span>.stringify(stored));
+
+    callback();
+  };
+
+  <span class="hljs-keyword">var</span> _remove = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id</span>) </span>{
+    <span class="hljs-keyword">var</span> stored = <span class="hljs-built_in">JSON</span>.parse(kv.getItem(entity));
+    <span class="hljs-keyword">var</span> length = stored.length;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+      <span class="hljs-keyword">if</span> (stored[i].id === id) {
+        stored.splice(i, <span class="hljs-number">1</span>);
+        kv.setItem(entity, <span class="hljs-built_in">JSON</span>.stringify(stored));
+        <span class="hljs-keyword">return</span>;
+      }
+    }
+  };
+
+  ready({
+    set: _set,
+    setAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, values, callback</span>) </span>{
+      <span class="hljs-keyword">var</span> responseCallback = commons.multipleActionCallbackWrapper(values.length, callback);
+      values.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value</span>) </span>{
+        _set(entity, value, responseCallback.countDown);
+      });
+    },
+    get: _get,
+    getAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+      <span class="hljs-keyword">var</span> value = kv.getItem(entity);
+      callback(value ? <span class="hljs-built_in">JSON</span>.parse(value) : []);
+    },
+    remove: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+      _remove(entity, id);
+      callback();
+    },
+    removeAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+      kv.removeItem(entity);
+      callback();
+    },
+    close: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>There is nothing to do</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    }
+  });
+};
+
+storage.WebSQL = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">ready, commons</span>) </span>{
+  <span class="hljs-keyword">var</span> db;
+
+  <span class="hljs-keyword">var</span> _createTable = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">name, callback</span>) </span>{
+    db.transaction(
+      <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction</span>) </span>{
+        transaction.executeSql(
+          <span class="hljs-string">'CREATE TABLE if not exists '</span> + name + <span class="hljs-string">'(id TEXT NOT NULL, value TEXT, PRIMARY KEY(id));'</span>,
+          [],
+          callback,
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, error</span>) </span>{
+            <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'Oops.  Error was '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+          }
+        );
+      }
+    );
+  };
+
+  <span class="hljs-keyword">var</span> _set = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, value, callback</span>) </span>{
+    db.transaction(
+      <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction</span>) </span>{
+        transaction.executeSql(
+          <span class="hljs-string">'INSERT OR REPLACE into '</span> + entity + <span class="hljs-string">'(id, value) VALUES ( ?, ? );'</span>,
+          [value.id, <span class="hljs-built_in">JSON</span>.stringify(value)],
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+            callback();
+          },
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, error</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>No such table</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (error.code === <span class="hljs-number">5</span>) {
+              <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"WebSQL: going to create table "</span> + entity);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>create the table and try again</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>              _createTable(entity, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+                <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"WebSQL: created table "</span> + entity);
+                _set(entity, value, callback);
+              });
+            } <span class="hljs-keyword">else</span> {
+              <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'WebSQL Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+              callback();
+            }
+          }
+        );
+      });
+  };
+
+  <span class="hljs-keyword">var</span> _get = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+    db.transaction(
+      <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction</span>) </span>{
+        transaction.executeSql(
+          <span class="hljs-string">"select value from "</span> + entity + <span class="hljs-string">" where id=?;"</span>,
+          [id],
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, results</span>) </span>{
+            callback(results.rows.length &gt; <span class="hljs-number">0</span> ? <span class="hljs-built_in">JSON</span>.parse(results.rows.item(<span class="hljs-number">0</span>).value) : <span class="hljs-literal">undefined</span>);
+          },
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, error</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>No such table</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (error.code === <span class="hljs-number">5</span>) {
+              callback();
+            } <span class="hljs-keyword">else</span> {
+              <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'WebSQL Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+              callback();
+            }
+          }
+        );
+      }
+    );
+  };
+
+  <span class="hljs-keyword">var</span> _getAll = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+    db.transaction(
+      <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction</span>) </span>{
+        transaction.executeSql(
+          <span class="hljs-string">"select value from "</span> + entity,
+          [],
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, results</span>) </span>{
+            <span class="hljs-keyword">var</span> objectArray = [];
+            <span class="hljs-keyword">var</span> length = results.rows.length;
+            <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+              objectArray.push(<span class="hljs-built_in">JSON</span>.parse(results.rows.item(i).value));
+            }
+            callback(objectArray);
+          },
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, error</span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>No such table</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (error.code === <span class="hljs-number">5</span>) {
+              callback([]);
+            } <span class="hljs-keyword">else</span> {
+              <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'WebSQL Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+              callback();
+            }
+          }
+        );
+      }
+    );
+  };
+
+  <span class="hljs-keyword">var</span> _remove = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+    db.transaction(
+      <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction</span>) </span>{
+        transaction.executeSql(
+          <span class="hljs-string">"delete from "</span> + entity + <span class="hljs-string">" where id=?"</span>,
+          [id],
+          callback,
+          <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction, error</span>) </span>{
+            <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'WebSQL Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+            callback();
+          }
+        );
+      }
+    );
+  };
+
+  <span class="hljs-keyword">var</span> _removeAll = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+    db.transaction(
+      <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">transaction</span>) </span>{
+        transaction.executeSql(
+          <span class="hljs-string">"drop table "</span> + entity + <span class="hljs-string">""</span>,
+          [],
+          callback,</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>table doesnt exist</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          callback
+        );
+      }
+    );
+  };
+
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">window</span>.openDatabase) {
+      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'SQL Database not supported'</span>);
+      ready();
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">var</span> shortName = <span class="hljs-string">'storage.js'</span>;
+      <span class="hljs-keyword">var</span> version = <span class="hljs-string">'1.0'</span>;
+      <span class="hljs-keyword">var</span> displayName = <span class="hljs-string">'storage.js database'</span>;
+      <span class="hljs-keyword">var</span> maxSize = <span class="hljs-number">65536</span>; <span class="hljs-comment">// in bytes</span>
+      db = openDatabase(shortName, version, displayName, maxSize);
+
+      ready({
+        set: _set,
+        setAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, values, callback</span>) </span>{
+          <span class="hljs-keyword">var</span> responseCallback = commons.multipleActionCallbackWrapper(values.length, callback);
+          values.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value</span>) </span>{
+            _set(entity, value, responseCallback.countDown);
+          });
+        },
+        get: _get,
+        getAll: _getAll,
+        remove: _remove,
+        removeAll: _removeAll,
+        close: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>There is nothing to do</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        }
+      });
+    }
+  } <span class="hljs-keyword">catch</span> (e) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Error handling code goes here.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (e === <span class="hljs-number">2</span>) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Version number mismatch.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"Invalid database version."</span>);
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"Unknown error "</span> + e + <span class="hljs-string">"."</span>);
+    }
+  }
+};
+
+storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">ready, commons</span>) </span>{
+  <span class="hljs-keyword">var</span> indexedDB = <span class="hljs-built_in">window</span>.indexedDB || <span class="hljs-built_in">window</span>.webkitIndexedDB || <span class="hljs-built_in">window</span>.mozIndexedDB || <span class="hljs-built_in">window</span>.msIndexedDB;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.mozIDBTransaction || window.msIDBTransaction;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> db;
+
+  <span class="hljs-keyword">var</span> _createObjectStore = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+    db.close();
+    <span class="hljs-keyword">var</span> versionRequest = indexedDB.open(<span class="hljs-string">"storage_js"</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime());
+    versionRequest.onupgradeneeded = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      db = versionRequest.result;
+      db.createObjectStore(entity, {keyPath: <span class="hljs-string">"id"</span>});
+    };
+    versionRequest.onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      callback();
+    };
+  };
+
+  <span class="hljs-keyword">var</span> _set = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, value, callback</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">if</span> (!db.objectStoreNames.contains(entity)) {
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"IndexedDB: going to create objectStore "</span> + entity);
+        _createObjectStore(entity, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"IndexedDB: created objectStore "</span> + entity);
+          _set(entity, value, callback);
+        });
+        <span class="hljs-keyword">return</span>;
+      }
+
+      <span class="hljs-keyword">var</span> transaction = db.transaction([entity], <span class="hljs-string">"readwrite"</span>);
+      <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
+      <span class="hljs-keyword">var</span> request = objectStore.put(value);
+      transaction.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+      };
+      request.onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+        callback();
+      };
+      request.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+      };
+    } <span class="hljs-keyword">catch</span> (error) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>error code 3 and 8 are not found on chrome and canary respectively</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (error.code !== <span class="hljs-number">3</span> &amp;&amp; error.code !== <span class="hljs-number">8</span>) {
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        callback();
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"IndexedDB: going to create objectStore "</span> + entity);
+        _createObjectStore(entity, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+          _set(entity, value, callback);
+        });
+      }
+    }
+  };
+
+  <span class="hljs-keyword">var</span> _get = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">var</span> transaction = db.transaction([entity], <span class="hljs-string">"readwrite"</span>);
+      transaction.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+      };
+
+      <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
+      objectStore.get(id).onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+        callback(event.target.result);
+      };
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+      callback();
+    }
+  };
+
+  <span class="hljs-keyword">var</span> _getAll = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">var</span> objectArray = [];
+      <span class="hljs-keyword">var</span> transaction = db.transaction([entity], <span class="hljs-string">"readwrite"</span>);
+      transaction.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
+        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+      };
+
+      <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
+      objectStore.openCursor().onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+        <span class="hljs-keyword">var</span> cursor = event.target.result;
+        <span class="hljs-keyword">if</span> (cursor) {
+          objectArray.push(cursor.value);
+          cursor.continue();
+        }
+        <span class="hljs-keyword">else</span> {
+          callback(objectArray);
+        }
+      };
+    } <span class="hljs-keyword">catch</span> (error) {
+      callback([]);
+    }
+  };
+
+  <span class="hljs-keyword">var</span> _remove = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
+    <span class="hljs-keyword">var</span> transaction = db.transaction([entity], <span class="hljs-string">"readwrite"</span>);
+    <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
+    objectStore.delete(id).onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      callback();
+    };
+  };
+
+  <span class="hljs-keyword">var</span> _removeAll = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
+    db.close();
+    <span class="hljs-keyword">var</span> request = indexedDB.open(<span class="hljs-string">"storage_js"</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime());
+    request.onupgradeneeded = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">try</span> {
+        db = request.result;
+        <span class="hljs-keyword">if</span> (db.objectStoreNames.contains(entity)) {
+          db.deleteObjectStore(entity);
+        }
+        callback();
+      } <span class="hljs-keyword">catch</span> (error) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>error code 3 and 8 are not found on chrome and canary respectively</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (error.code !== <span class="hljs-number">3</span> &amp;&amp; error.code !== <span class="hljs-number">8</span>) {
+          <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        } <span class="hljs-keyword">else</span> {
+          callback();
+        }
+      }
+    };
+  };
+
+  <span class="hljs-keyword">var</span> _close = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    db.close();
+  };
+
+  <span class="hljs-keyword">if</span> (indexedDB) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Now we can open our database</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> request = indexedDB.open(<span class="hljs-string">"storage_js"</span>);
+    request.onupgradeneeded = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"UPGRADE NEEDED"</span>);
+    };
+    request.onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+      db = request.result;
+      ready({
+        set: _set,
+        setAll: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, values, callback</span>) </span>{
+          <span class="hljs-keyword">var</span> seqWrapper = commons.sequencialActionCallbackWrapper(values, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">value</span>) </span>{
+            _set(entity, value, seqWrapper.next);
+          }, callback);
+          seqWrapper.next();
+        },
+        get: _get,
+        getAll: _getAll,
+        remove: _remove,
+        removeAll: _removeAll,
+        close: _close
+      });
+    };
+    request.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) </span>{
+      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"An error ocurred"</span>, event);
+      ready();
+    };
+  } <span class="hljs-keyword">else</span> {
+    ready();
+  }
+};
+<span class="hljs-built_in">window</span>.storage = storage;</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
