@@ -30,7 +30,7 @@
                 </a>
               
                 
-                <a class="source" href="storagejs-1.1.0.html">
+                <a class="source" href="storagejs-1.0.1.html">
                   storagejs-1.0.1.js
                 </a>
               
@@ -210,7 +210,7 @@
 
   <span class="hljs-keyword">var</span> _get = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, id, callback</span>) </span>{
     <span class="hljs-keyword">var</span> stored = <span class="hljs-built_in">JSON</span>.parse(kv.getItem(entity));
-    <span class="hljs-keyword">var</span> length = stored.length;
+    <span class="hljs-keyword">var</span> length = stored ? stored.length : <span class="hljs-number">0</span>;
 
     <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
       <span class="hljs-keyword">if</span> (stored[i].id === id) {
@@ -582,8 +582,23 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
             <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">var</span> db;
 
   <span class="hljs-keyword">var</span> _createObjectStore = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
-    db.close();
-    <span class="hljs-keyword">var</span> versionRequest = indexedDB.open(<span class="hljs-string">"storage_js"</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime());
+    db.close();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>IE fails with versions bigger that 9 digits and requires the type to be int (number fails with InvalidAccessError)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">var</span> version = <span class="hljs-built_in">parseInt</span>(<span class="hljs-built_in">Math</span>.round(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime() / <span class="hljs-number">1000</span>) % <span class="hljs-number">1000000000</span>);
+    <span class="hljs-keyword">var</span> versionRequest = indexedDB.open(<span class="hljs-string">"storage_js"</span>, version);
     versionRequest.onupgradeneeded = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       db = versionRequest.result;
       db.createObjectStore(entity, {keyPath: <span class="hljs-string">"id"</span>});
@@ -608,31 +623,31 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
       <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
       <span class="hljs-keyword">var</span> request = objectStore.put(value);
       transaction.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
-        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
       };
       request.onsuccess = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
         callback();
       };
       request.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
-        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
       };
     } <span class="hljs-keyword">catch</span> (error) {</pre></div></div>
             
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>error code 3 and 8 are not found on chrome and canary respectively</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (error.code !== <span class="hljs-number">3</span> &amp;&amp; error.code !== <span class="hljs-number">8</span>) {
-        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
         callback();
       } <span class="hljs-keyword">else</span> {
         <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">"IndexedDB: going to create objectStore "</span> + entity);
@@ -647,7 +662,7 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">var</span> transaction = db.transaction([entity], <span class="hljs-string">"readwrite"</span>);
       transaction.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
-        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
       };
 
       <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
@@ -655,7 +670,7 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
         callback(event.target.result);
       };
     } <span class="hljs-keyword">catch</span> (error) {
-      <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+      <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
       callback();
     }
   };
@@ -665,7 +680,7 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
       <span class="hljs-keyword">var</span> objectArray = [];
       <span class="hljs-keyword">var</span> transaction = db.transaction([entity], <span class="hljs-string">"readwrite"</span>);
       transaction.onerror = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">error</span>) </span>{
-        <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+        <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
       };
 
       <span class="hljs-keyword">var</span> objectStore = transaction.objectStore(entity);
@@ -694,7 +709,8 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
 
   <span class="hljs-keyword">var</span> _removeAll = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">entity, callback</span>) </span>{
     db.close();
-    <span class="hljs-keyword">var</span> request = indexedDB.open(<span class="hljs-string">"storage_js"</span>, <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime());
+    <span class="hljs-keyword">var</span> version = <span class="hljs-built_in">parseInt</span>(<span class="hljs-built_in">Math</span>.round(<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getTime() / <span class="hljs-number">1000</span>) % <span class="hljs-number">1000000000</span>);
+    <span class="hljs-keyword">var</span> request = indexedDB.open(<span class="hljs-string">"storage_js"</span>, version);
     request.onupgradeneeded = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
       <span class="hljs-keyword">try</span> {
         db = request.result;
@@ -707,18 +723,18 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>error code 3 and 8 are not found on chrome and canary respectively</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> (error.code !== <span class="hljs-number">3</span> &amp;&amp; error.code !== <span class="hljs-number">8</span>) {
-          <span class="hljs-built_in">window</span>.console.log(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
+          <span class="hljs-built_in">window</span>.console.trace(<span class="hljs-string">'IndexedDB Error: '</span> + error.message + <span class="hljs-string">' (Code '</span> + error.code + <span class="hljs-string">')'</span>, error);
         } <span class="hljs-keyword">else</span> {
           callback();
         }
@@ -735,11 +751,11 @@ storage.IndexedDB = <span class="hljs-function"><span class="hljs-keyword">funct
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Now we can open our database</p>
 
