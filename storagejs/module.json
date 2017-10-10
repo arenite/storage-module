@@ -14,7 +14,7 @@
       "dev": {
         "sync": [
           {
-            "url": "//cdn.rawgit.com/lcavadas/storage.js/1.0.1/build/storage.js",
+            "url": "//cdn.rawgit.com/lcavadas/storage.js/1.1.0/build/storage.js",
             "instances": {
               "storagejs": "storage"
             }

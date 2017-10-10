@@ -6,8 +6,8 @@
   var jshint = require('gulp-jshint');
   var concat = require('gulp-concat');
   var minifyCSS = require('gulp-minify-css');
-  var arenitesrc = require('gulp-arenite-src');
   var shell = require('gulp-shell');
+  var arenitesrc = require('gulp-arenite-src');
 
   var build = 'build/';
 
