@@ -1,6 +1,6 @@
 {
   "name": "arenite-template-extensions",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Arenite templating extensions",
   "repository": "git://github.com/arenite/template-extension",
   "author": {
